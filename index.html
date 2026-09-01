@@ -1538,6 +1538,25 @@ img {
   margin-top: 7px;
   font-size: 20px;
 }
+.dv-award-badge {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1.2;
+}
+.dv-award-badge__k {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  opacity: 0.72;
+}
 .dv-stackstrip {
   display: flex;
   flex-wrap: wrap;
@@ -2094,6 +2113,11 @@ img {
   border-color: color-mix(in srgb, var(--on-accent, #ffffff) 46%, transparent);
   color: var(--on-accent, #ffffff);
 }
+.dv-pcover.dv-pcover--accent .dv-award-badge {
+  background: color-mix(in srgb, var(--on-accent, #ffffff) 14%, transparent);
+  border-color: color-mix(in srgb, var(--on-accent, #ffffff) 42%, transparent);
+  color: var(--on-accent, #ffffff);
+}
 .dv-pcover.dv-pcover--accent .pf-evidence__frame {
   background: color-mix(in srgb, var(--on-accent, #ffffff) 14%, transparent);
 }
@@ -2186,6 +2210,7 @@ img {
   </div>
   <div class="dv-pcover__base">
     <div class="dv-pcover__col">
+      <div class="dv-award-badge"><span class="dv-award-badge__k">AWARD</span><span>최우수상 · 2026.08</span></div>
       <div class="pf-meta">
         <div>
           <span class="pf-meta__k">DATE</span><span class="pf-meta__v">2026.07 ~ 2026.08</span>
