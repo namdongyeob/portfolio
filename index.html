@@ -14,78 +14,109 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: one reading column; each case reads 문제 → 한 일 → 결과, technical detail folds away for developers */
+/* Layout: dark "control room" hero states the claim and numbers; below, each case opens with a visual of the system (flow, chart, agent loop), then 문제 → 한 일 → 결과 */
 :root {
-  --bg: #f5f6f8;
+  --bg: #f4f5f8;
   --surface: #ffffff;
-  --fg: #151922;
+  --fg: #141925;
   --muted: #5a6273;
-  --line: #dfe3ea;
+  --line: #dde2ea;
   --accent: #2f56d9;
-  --accent-soft: #e6ecfc;
+  --accent-soft: #e5ebfc;
   --human: #b8740f;
-  --human-soft: #fbf0dc;
+  --human-soft: #fbefd9;
+  --band: #0f1527;
+  --band-fg: #eef1fa;
+  --band-muted: #a3acc2;
+  --band-line: #283050;
+  --band-accent: #8eabff;
+  --good: #1f8a5b;
   --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
   --step--1: 0.8125rem;
   --step-0: 1rem;
   --step-1: 1.1875rem;
   --step-2: 1.5rem;
-  --step-3: 2.25rem;
+  --step-3: clamp(1.9rem, 5vw, 2.75rem);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f1218; --surface: #161a22; --fg: #e8ebf1; --muted: #9aa3b5; --line: #262c38;
-    --accent: #8aa6ff; --accent-soft: #1c2440; --human: #f0b75a; --human-soft: #2c2414;
+    --bg: #0d1017; --surface: #151a23; --fg: #e8ebf1; --muted: #9aa3b5; --line: #262c38;
+    --accent: #8aa6ff; --accent-soft: #1b2340; --human: #f0b75a; --human-soft: #2b2313;
+    --band: #070a12; --band-line: #1e2540; --good: #4cc38a;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0f1218; --surface: #161a22; --fg: #e8ebf1; --muted: #9aa3b5; --line: #262c38;
-  --accent: #8aa6ff; --accent-soft: #1c2440; --human: #f0b75a; --human-soft: #2c2414;
+  --bg: #0d1017; --surface: #151a23; --fg: #e8ebf1; --muted: #9aa3b5; --line: #262c38;
+  --accent: #8aa6ff; --accent-soft: #1b2340; --human: #f0b75a; --human-soft: #2b2313;
+  --band: #070a12; --band-line: #1e2540; --good: #4cc38a;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body {
-  background: var(--bg); color: var(--fg);
+  margin: 0; background: var(--bg); color: var(--fg);
   font-family: var(--font-body); font-size: var(--step-0); line-height: 1.7;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
   word-break: keep-all; overflow-wrap: anywhere;
 }
-.wrap { max-width: 760px; margin: 0 auto; padding-block: 56px 72px; display: grid; gap: 72px; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--band); }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.inner { max-width: 880px; margin: 0 auto; }
 a { color: var(--accent); text-underline-offset: 3px; }
 a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.3; }
 p { margin: 0; }
-.label { font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: 0.04em; color: var(--muted); }
+.label { font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: 0.06em; color: var(--muted); }
 
-/* hero */
-.hero { display: grid; gap: 20px; }
-.hero h1 { font-size: var(--step-3); font-weight: 700; letter-spacing: -0.02em; }
-.hero .role { font-size: var(--step-1); font-weight: 500; color: var(--accent); }
-.hero .thesis { font-size: var(--step-1); max-width: 34em; }
+/* sticky nav */
+nav.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--band); color: var(--band-fg); border-bottom: 1px solid var(--band-line); }
+nav.top .inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; }
+nav.top strong { font-size: var(--step--1); letter-spacing: 0.02em; }
+nav.top ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px 18px; flex-wrap: wrap; font-size: var(--step--1); }
+nav.top a { color: var(--band-muted); text-decoration: none; }
+nav.top a:hover { color: var(--band-fg); }
+@media (max-width: 520px) { nav.top ul li.opt { display: none; } }
+
+/* hero band */
+.hero { background: var(--band); color: var(--band-fg); }
+.hero .inner { padding-block: 48px 40px; display: grid; gap: 22px; }
+.hero .label { color: var(--band-accent); }
+.hero h1 { font-size: var(--step-3); font-weight: 700; letter-spacing: -0.02em; max-width: 18em; }
+.hero h1 em { font-style: normal; color: var(--band-accent); }
+.hero .who { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; }
+.hero .who b { font-size: var(--step-1); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips span { font-size: var(--step--1); border: 1px solid var(--band-line); border-radius: 999px; padding: 2px 12px; color: var(--band-fg); }
+.hero .lead { color: var(--band-muted); max-width: 40em; }
 .links { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: var(--step--1); align-items: center; }
+.hero .links a { color: var(--band-fg); }
 .email { display: inline-flex; gap: 8px; align-items: center; }
 .email code { font-family: var(--font-mono); user-select: all; }
-button.copy { font: inherit; font-size: var(--step--1); border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 6px; padding: 2px 10px; cursor: pointer; }
-button.copy:hover { border-color: var(--accent); }
+button.copy { font: inherit; font-size: var(--step--1); border: 1px solid var(--band-line); background: transparent; color: var(--band-fg); border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+button.copy:hover { border-color: var(--band-accent); }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--band-line); margin-top: 6px; }
+.stat { padding: 18px 16px 0 0; display: grid; gap: 4px; min-width: 0; }
+.stat + .stat { padding-left: 16px; border-left: 1px solid var(--band-line); }
+.stat strong { font-family: var(--font-mono); font-size: var(--step-2); font-weight: 500; font-variant-numeric: tabular-nums; color: var(--band-fg); }
+.stat span { font-size: var(--step--1); color: var(--band-muted); }
+@media (max-width: 600px) { .stats { grid-template-columns: 1fr; } .stat + .stat { border-left: 0; padding-left: 0; border-top: 1px solid var(--band-line); } .stat { padding-bottom: 14px; } }
 
-.figures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; border-top: 1px solid var(--line); padding-top: 20px; }
-.figure { display: grid; gap: 4px; min-width: 0; }
-.figure strong { font-family: var(--font-mono); font-size: var(--step-2); font-weight: 500; font-variant-numeric: tabular-nums; }
-.figure span { font-size: var(--step--1); color: var(--muted); }
-@media (max-width: 560px) { .figures { grid-template-columns: 1fr; } }
-
-/* sections */
-section { display: grid; gap: 28px; }
+main .inner { padding-block: 56px 72px; display: grid; gap: 72px; }
+section { display: grid; gap: 28px; scroll-margin-top: 64px; }
 section > header { display: grid; gap: 6px; }
 section > header h2 { font-size: var(--step-2); font-weight: 700; }
-.case { display: grid; gap: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 28px clamp(18px, 4vw, 32px); }
+
+/* case */
+.case { display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.case .visual { background: var(--accent-soft); padding: 22px clamp(16px, 4vw, 30px); display: grid; gap: 12px; min-width: 0; }
+.case .body { padding: 26px clamp(18px, 4vw, 32px) 28px; display: grid; gap: 18px; min-width: 0; }
+.case .kicker { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: var(--step--1); color: var(--muted); }
+.case .kicker b { color: var(--accent); font-weight: 600; }
 .case h3 { font-size: var(--step-1); font-weight: 700; }
-.case .meta { font-size: var(--step--1); color: var(--muted); }
+.outcome { font-family: var(--font-mono); font-size: var(--step-1); font-weight: 500; color: var(--fg); }
+.outcome small { display: block; font-family: var(--font-body); font-size: var(--step--1); color: var(--muted); font-weight: 400; }
 .case figure { margin: 0; }
-.case img { display: block; width: 100%; max-width: 100%; border-radius: 8px; aspect-ratio: 16 / 9; object-fit: cover; }
+.case img { display: block; width: 100%; max-width: 100%; border-radius: 10px; aspect-ratio: 16 / 9; object-fit: cover; }
 dl.story { display: grid; grid-template-columns: 4.5em minmax(0, 1fr); gap: 14px 16px; margin: 0; }
 dl.story dt { font-weight: 600; color: var(--muted); font-size: var(--step--1); padding-top: 3px; }
 dl.story dd { margin: 0; min-width: 0; }
@@ -94,11 +125,11 @@ dd.result { font-weight: 500; }
 @media (max-width: 480px) { dl.story { grid-template-columns: 1fr; gap: 4px; } dl.story dd { margin-bottom: 10px; } }
 .note { font-size: var(--step--1); color: var(--muted); }
 
-/* the human-check flow, specific to the Crowdworks case */
+/* visual 1: human-check flow */
 .flow { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; counter-reset: s; }
-.flow li { counter-increment: s; background: var(--accent-soft); border-radius: 8px; padding: 12px 10px; font-size: var(--step--1); line-height: 1.5; min-width: 0; display: grid; gap: 4px; align-content: start; }
+.flow li { counter-increment: s; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 10px; font-size: var(--step--1); line-height: 1.5; min-width: 0; display: grid; gap: 4px; align-content: start; }
 .flow li::before { content: counter(s); font-family: var(--font-mono); color: var(--accent); font-weight: 500; }
-.flow li.human { background: var(--human-soft); }
+.flow li.human { background: var(--human-soft); border-color: transparent; }
 .flow li.human::before { color: var(--human); }
 @media (max-width: 640px) { .flow { grid-template-columns: 1fr; } .flow li { grid-template-columns: 1.5em 1fr; } }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: var(--step--1); color: var(--muted); }
@@ -106,11 +137,32 @@ dd.result { font-weight: 500; }
 .legend .ai i { background: var(--accent); }
 .legend .hm i { background: var(--human); }
 
+/* visual 2: before/after bars, drawn to scale */
+.bars { display: grid; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+.bar-group { display: grid; gap: 6px; }
+.bar-group > span { font-size: var(--step--1); font-weight: 600; }
+.bar { display: grid; grid-template-columns: 3.2em minmax(0, 1fr) 4.6em; gap: 10px; align-items: center; font-size: var(--step--1); }
+.bar .k { color: var(--muted); }
+.bar .track { height: 10px; background: var(--line); border-radius: 999px; overflow: hidden; }
+.bar .fill { height: 100%; border-radius: 999px; background: var(--muted); min-width: 3px; }
+.bar.after .fill { background: var(--good); }
+.bar .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+
+/* visual 3: agent loop */
+.agents { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; position: relative; }
+.agent { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 4px; min-width: 0; }
+.agent b { font-size: var(--step--1); }
+.agent span { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+.agent .tag { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent); }
+.loop { display: flex; align-items: center; gap: 10px; background: var(--human-soft); border-radius: 10px; padding: 10px 12px; font-size: var(--step--1); }
+.loop .tag { font-family: var(--font-mono); color: var(--human); white-space: nowrap; }
+@media (max-width: 600px) { .agents { grid-template-columns: 1fr; } }
+
 details { border-top: 1px solid var(--line); padding-top: 14px; }
 summary { cursor: pointer; font-size: var(--step--1); font-weight: 600; color: var(--accent); }
 details[open] summary { margin-bottom: 12px; }
 details ul { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; font-size: 0.9375rem; }
-.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
 .tags span { font-family: var(--font-mono); font-size: 0.75rem; border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; color: var(--muted); }
 
 .small-cases { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -118,161 +170,199 @@ details ul { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; font-size:
 .small-cases h3 { font-size: var(--step-0); font-weight: 700; }
 @media (max-width: 560px) { .small-cases { grid-template-columns: 1fr; } }
 
-.principles { margin: 0; padding: 0; list-style: none; display: grid; gap: 18px; }
-.principles li { display: grid; gap: 4px; }
-.principles strong { font-weight: 600; }
-.steps { counter-reset: st; }
-.steps li { counter-increment: st; grid-template-columns: 2em minmax(0, 1fr); column-gap: 8px; }
-.steps li::before { content: counter(st); grid-row: span 3; font-family: var(--font-mono); font-weight: 500; color: var(--accent); padding-top: 1px; }
-.steps li > * { grid-column: 2; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; counter-reset: st; }
+.steps li { counter-increment: st; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.steps li::before { content: counter(st, decimal-leading-zero); font-family: var(--font-mono); font-size: var(--step--1); color: var(--accent); }
+.steps strong { font-weight: 600; }
 .steps .where { font-size: var(--step--1); color: var(--muted); }
+@media (max-width: 600px) { .steps { grid-template-columns: 1fr; } }
 
 .timeline { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; }
 .timeline li { display: grid; grid-template-columns: 8.5em minmax(0, 1fr); gap: 16px; }
 .timeline .when { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 3px; }
 @media (max-width: 480px) { .timeline li { grid-template-columns: 1fr; gap: 0; } }
 
-footer { border-top: 1px solid var(--line); padding-top: 20px; display: grid; gap: 10px; font-size: var(--step--1); color: var(--muted); }
+footer { background: var(--band); color: var(--band-muted); }
+footer .inner { padding-block: 28px; display: grid; gap: 8px; font-size: var(--step--1); }
+footer a { color: var(--band-fg); }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 </style>
-
 </head>
 <body>
-<div class="wrap">
 
-  <header class="hero">
-    <p class="label">PORTFOLIO · 2026</p>
-    <h1>남동엽</h1>
-    <p class="role">AX 엔지니어 · 백엔드 개발자</p>
-    <p class="thesis">현장 업무에 AI를 붙이고, 믿고 쓸 수 있게 만듭니다. AI가 같은 기준으로 판단하도록 기준과 기억을 정리하고, 틀린 것은 규칙으로 바꾸고, 사람이 확인할 지점까지 설계합니다.</p>
-    <div class="links">
+<nav class="top gutter" aria-label="바로가기">
+  <div class="inner">
+    <strong>남동엽</strong>
+    <ul>
+      <li><a href="#cases">대표 사례</a></li>
+      <li class="opt"><a href="#how">일하는 방식</a></li>
+      <li class="opt"><a href="#path">경력</a></li>
+      <li><a href="#contact">연락하기</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero gutter">
+  <div class="inner">
+    <p class="label">AX ENGINEER · PORTFOLIO 2026</p>
+    <h1>현장 업무에 AI를 붙이고, <em>믿고 쓸 수 있게</em> 만듭니다.</h1>
+    <div class="who"><b>남동엽</b><div class="chips"><span>AX 엔지니어</span><span>FDE</span><span>AI 에이전트 개발</span><span>백엔드</span></div></div>
+    <p class="lead">AI가 같은 기준으로 판단하도록 기준과 기억을 정리하고, 틀린 것은 규칙으로 바꾸고, 사람이 확인할 지점까지 설계합니다.</p>
+    <div class="links" id="contact">
       <span class="email"><code id="email">ehdduq1324@gmail.com</code><button class="copy" id="copy-email" type="button">복사</button></span>
       <a href="https://github.com/namdongyeob" target="_blank" rel="noopener">GitHub</a>
       <a href="https://www.linkedin.com/in/namdongyeob" target="_blank" rel="noopener">LinkedIn</a>
     </div>
-    <div class="figures">
-      <div class="figure"><strong>3~4시간 → 1시간</strong><span>하루 200건 검수, AI와 나눠서 (본인 작업 기준)</span></div>
-      <div class="figure"><strong>12 / 12</strong><span>AI가 잘못 쓴 숫자 문장을 모두 걸러냄</span></div>
-      <div class="figure"><strong>최우수상</strong><span>부트캠프 최종 프로젝트, 4인 팀장</span></div>
+    <div class="stats">
+      <div class="stat"><strong>3~4시간 → 1시간</strong><span>하루 200건 검수를 AI와 나눠서 (본인 작업 기준)</span></div>
+      <div class="stat"><strong>12 / 12</strong><span>일부러 오류를 넣은 AI 숫자 문장 12건 모두 탐지</span></div>
+      <div class="stat"><strong>최우수상</strong><span>부트캠프 최종 프로젝트, 4인 팀장</span></div>
     </div>
-  </header>
+  </div>
+</header>
 
-  <section aria-labelledby="cases-title">
+<main class="gutter">
+<div class="inner">
+
+  <section id="cases" aria-labelledby="cases-title">
     <header>
       <p class="label">대표 사례</p>
       <h2 id="cases-title">AI에게 일을 맡기고, 사람이 확인할 곳을 정했습니다</h2>
     </header>
 
     <article class="case">
-      <div>
-        <h3>AI가 같은 기준으로 판단하고, 틀린 걸 배우게 만든 검수 체계</h3>
-        <p class="meta">크라우드웍스 · AI 에이전트 평가 데이터 검수 · 2026.09 – 현재 · 회사 지시 없이 개인이 구축</p>
-      </div>
-      <dl class="story">
-        <dt>문제</dt>
-        <dd>고객 요청을 처리하는 AI 에이전트가 금융·여행 규정을 제대로 지키는지 검수하는 일입니다. 하루 200건을 혼자 3~4시간 집중해서 봐야 했고, AI에게 맡기려 해도 세션마다 판단이 달라지거나 틀린 판단을 그대로 배우는 문제가 있었습니다.</dd>
-        <dt>한 일</dt>
-        <dd>
-          <ul>
-            <li>Claude Code·Codex로 AI와 나눠 검수하는 환경을 직접 만들었습니다. AI가 한 번에 많은 문서를 읽으면 뒤로 갈수록 틀려서 50건씩 나눠 맡겼습니다.</li>
-            <li><strong>기억 관리:</strong> AI가 기억하는 내용을 확정된 기준, 아직 확인 안 된 의견, 사실, 검토 기록으로 나누고, 제가 확인한 것만 확정 기준으로 올렸습니다. 새 의견이 기존 기준과 부딪히면 덮어쓰지 않고 충돌로 따로 남겼습니다.</li>
-            <li><strong>실수를 규칙으로:</strong> 지적이나 실수가 나올 때마다 근거, 적용할 때와 적용하지 말아야 할 때, 좋은 예와 반례를 같은 형식으로 기록해 비슷한 다른 경우에 잘못 적용되지 않게 했습니다.</li>
-            <li><strong>두 AI로 교차 검증:</strong> 같은 문제 20개를 서로 다른 AI 모델 두 개에게 답을 보여주지 않고 따로 판정시켜, 엇갈린 이유를 예외와 반례로 기준에 추가했습니다.</li>
-            <li>세션이 바뀌어도 이어서 일하도록 인수인계 기록을 남기고, 클릭이 많은 작업 화면에는 단축키 판정 도구를 붙였습니다.</li>
-          </ul>
-        </dd>
-        <dt>결과</dt>
-        <dd class="result">3~4시간 걸리던 200건이 약 1시간에 끝납니다. 두 AI의 최종 판정은 20건 중 15건(75%)이 일치했고, 엇갈린 사례는 기준을 더 정확하게 만드는 재료로 썼습니다.</dd>
-      </dl>
-      <div>
+      <div class="visual">
         <ol class="flow" aria-label="검수 흐름">
           <li>하루 200건 배정</li>
           <li>50건씩 나누기</li>
           <li>AI가 기준 문서대로 판정</li>
-          <li class="human">기준과 엇갈린 문제만 내가 확인</li>
+          <li class="human">기준 없는 판정과 기준대로 낸 판정이 갈린 문제만 내가 확인</li>
           <li class="human">확인한 것만 확정 기준으로 기록</li>
         </ol>
+        <div class="legend"><span class="ai"><i></i>AI가 하는 일</span><span class="hm"><i></i>사람이 하는 일</span></div>
       </div>
-      <div class="legend"><span class="ai"><i></i>AI가 하는 일</span><span class="hm"><i></i>사람이 하는 일</span></div>
-      <details>
-        <summary>자세히 보기 (개발자용)</summary>
-        <ul>
-          <li><strong>기억의 네 종류:</strong> 확정 원칙(사용자 확인, 다음 작업에 자동 적용), 임시 후보(에이전트 제안, 참고만), 사실 기록(해당 문제 범위에서만 사용), 검토 기록(어떤 자료에서 어떤 충돌을 봤는지). 임시 후보는 사용자 확인 후에만 승격합니다.</li>
-          <li><strong>학습 기록 형식:</strong> 관찰, 근거, 적용 조건, 적용하지 않을 조건, 좋은 예, 반례, 확인 상태, 바뀐 파일, 검증 위치. 개별 판정을 모든 작업의 규칙으로 올리지 않도록 범위를 함께 적습니다.</li>
-          <li><strong>독립 모델 비교:</strong> 두 모델에 같은 20개 문제와 기준만 주고 기존 판정·서로의 답은 주지 않았습니다. 최종 판정 일치 15/20(75%), 세 기준 모두 일치 14/20(70%), 기준별 일치 51/60(85%). 일부러 어려운 사례를 섞은 대표 표본이라 전체 정확도로 해석하지 않습니다.</li>
-          <li><strong>컨텍스트 관리:</strong> 작업 범위마다 읽어야 할 문서 목록과 파일 해시를 고정해, 세션이 바뀌어도 같은 근거로 판정하는지 확인합니다.</li>
-        </ul>
-        <div class="tags" style="margin-top:14px"><span>Claude Code</span><span>Codex</span><span>Ruflo</span><span>Node.js</span></div>
-      </details>
-      <p class="note">고객사 데이터 보호를 위해 화면, 문제 내용, 회사·상품 이름, 건수 총량은 싣지 않았습니다. 시간은 정밀 측정이 아닌 제 작업 기준입니다.</p>
+      <div class="body">
+        <div class="kicker"><b>크라우드웍스</b><span>AI 에이전트 평가 데이터 검수</span><span>2026.09 – 현재</span><span>회사 지시 없이 개인이 구축</span></div>
+        <h3>판단 기준을 통일하고, 실수를 기준에 반영한 AI 검수 체계</h3>
+        <p class="outcome">200건 · 3~4시간 → 약 1시간<small>본인 작업 기준, 정밀 측정 아님</small></p>
+        <dl class="story">
+          <dt>문제</dt>
+          <dd>고객 요청을 처리하는 AI 에이전트가 금융·여행 규정을 제대로 지키는지 검수하는 일입니다. 혼자 하면 200건을 3~4시간 집중해서 봐야 했고, AI에게 맡기려 해도 세션마다 판단이 달라지거나 틀린 판단을 그대로 배우는 문제가 있었습니다.</dd>
+          <dt>한 일</dt>
+          <dd>
+            <ul>
+              <li>Claude Code·Codex로 AI와 나눠 검수하는 환경을 직접 만들었습니다. AI가 한 번에 많은 문서를 읽으면 뒤로 갈수록 틀려서 50건씩 나눠 맡겼습니다.</li>
+              <li><strong>기억 관리:</strong> AI가 기억하는 내용을 확정된 기준, 아직 확인 안 된 의견, 사실, 검토 기록으로 나누고, 제가 확인한 것만 확정 기준으로 올렸습니다. 새 의견이 기존 기준과 부딪히면 덮어쓰지 않고 충돌로 따로 남겼습니다.</li>
+              <li><strong>실수를 규칙으로:</strong> 지적이나 실수가 나올 때마다 근거, 적용할 때와 적용하지 말아야 할 때, 좋은 예와 반례를 같은 형식으로 기록해 비슷한 다른 경우에 잘못 적용되지 않게 했습니다.</li>
+              <li><strong>두 AI로 교차 검증:</strong> 같은 문제 20개를 서로 다른 AI 모델 두 개에게 답을 보여주지 않고 따로 판정시켜, 엇갈린 이유를 예외와 반례로 기준에 추가했습니다.</li>
+              <li>세션이 바뀌어도 이어서 일하도록 인수인계 기록을 남기고, 클릭이 많은 작업 화면에는 단축키 판정 도구를 붙였습니다.</li>
+            </ul>
+          </dd>
+          <dt>결과</dt>
+          <dd class="result">체감상 3~4시간 걸리던 200건이 약 1시간에 끝납니다. 서로 다른 두 AI에게 같은 20문제를 판정시켜 불일치 5건을 찾았고, 이를 예외 기준으로 보완했습니다.</dd>
+        </dl>
+        <details>
+          <summary>자세히 보기 (개발자용)</summary>
+          <ul>
+            <li><strong>기억의 네 종류:</strong> 확정 원칙(사용자 확인, 다음 작업에 자동 적용), 임시 후보(에이전트 제안, 참고만), 사실 기록(해당 문제 범위에서만 사용), 검토 기록(어떤 자료에서 어떤 충돌을 봤는지). 임시 후보는 사용자 확인 후에만 승격합니다.</li>
+            <li><strong>학습 기록 형식:</strong> 관찰, 근거, 적용 조건, 적용하지 않을 조건, 좋은 예, 반례, 확인 상태, 바뀐 파일, 검증 위치. 개별 판정을 모든 작업의 규칙으로 올리지 않도록 범위를 함께 적습니다.</li>
+            <li><strong>독립 모델 비교:</strong> 두 모델에 같은 20개 문제와 기준만 주고 기존 판정·서로의 답은 주지 않았습니다. 최종 판정 일치 15/20(75%), 세 기준 모두 일치 14/20(70%), 기준별 일치 51/60(85%). 일부러 어려운 사례를 섞은 대표 표본이라 전체 정확도로 해석하지 않습니다.</li>
+            <li><strong>컨텍스트 관리:</strong> 작업 범위마다 읽어야 할 문서 목록과 파일 해시를 고정해, 세션이 바뀌어도 같은 근거로 판정하는지 확인합니다.</li>
+          </ul>
+          <div class="tags"><span>Claude Code</span><span>Codex</span><span>Ruflo</span><span>Node.js</span></div>
+        </details>
+        <p class="note">고객사 데이터 보호를 위해 화면, 문제 내용, 회사·상품 이름, 건수 총량은 싣지 않았습니다.</p>
+      </div>
     </article>
 
     <article class="case">
-      <div>
-        <h3>FinPlay · AI가 투자 판단을 돌아보게 돕는 모의투자 서비스</h3>
-        <p class="meta">내일배움캠프 최종 프로젝트 · 2026.07 – 08 · 4인 팀장 · 최우수상</p>
+      <div class="visual">
+        <figure><img src="finplay-cover.jpg" alt="FinPlay 서비스 표지: 주식·코인 교육형 모의투자 플랫폼" width="1200" height="675"></figure>
+        <div class="bars" role="img" aria-label="개선 전후 비교: 뉴스 요약 응답 시간 896밀리초에서 499밀리초, 요약 데이터베이스 조회 200건에서 1건">
+          <div class="bar-group"><span>뉴스 요약 응답 시간 (동시 200명, p95)</span>
+            <div class="bar"><span class="k">전</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="v">896ms</span></div>
+            <div class="bar after"><span class="k">후</span><span class="track"><span class="fill" style="width:55.7%"></span></span><span class="v">499ms</span></div>
+          </div>
+          <div class="bar-group"><span>요약 데이터 DB 조회 횟수</span>
+            <div class="bar"><span class="k">전</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="v">200건</span></div>
+            <div class="bar after"><span class="k">후</span><span class="track"><span class="fill" style="width:0.5%"></span></span><span class="v">1건</span></div>
+          </div>
+        </div>
       </div>
-      <figure><img src="finplay-cover.jpg" alt="FinPlay 서비스 표지: 주식·코인 교육형 모의투자 플랫폼" width="1200" height="675"></figure>
-      <dl class="story">
-        <dt>문제</dt>
-        <dd>가상 돈으로 주식·코인을 사고판 뒤 AI가 거래를 돌아봐 주는 서비스입니다. 그런데 AI가 '-2.17% 손실'을 '-21.7%'로 잘못 쓰면 사용자는 자기 거래 결과를 오해하게 됩니다.</dd>
-        <dt>한 일</dt>
-        <dd>
+      <div class="body">
+        <div class="kicker"><b>FinPlay</b><span>내일배움캠프 최종 프로젝트</span><span>2026.07 – 08</span><span>4인 팀장 · 최우수상</span></div>
+        <h3>AI가 투자 판단을 돌아보게 돕는 모의투자 서비스</h3>
+        <p class="outcome">AI 숫자 오류 12 / 12 탐지<small>일부러 넣은 잘못된 AI 문장 기준</small></p>
+        <dl class="story">
+          <dt>문제</dt>
+          <dd>가상 돈으로 주식·코인을 사고판 뒤 AI가 거래를 돌아봐 주는 서비스입니다. 그런데 AI가 '-2.17% 손실'을 '-21.7%'로 잘못 쓰면 사용자는 자기 거래 결과를 오해하게 됩니다.</dd>
+          <dt>한 일</dt>
+          <dd>
+            <ul>
+              <li>팀장으로 일정과 마감을 관리하고, 요구사항과 예외 상황을 먼저 문서로 정리해 4명이 같은 기준으로 개발하게 했습니다.</li>
+              <li>숫자 계산은 서버가 하고 AI는 문장만 쓰게 나눈 뒤, AI 문장 속 숫자를 서버 값과 대조하는 검사 장치를 만들었습니다.</li>
+              <li>AI가 멈추거나 늦어져도 거래는 계속되도록, 미리 준비한 안내 문장으로 자동 전환되게 했습니다.</li>
+              <li>사용자가 몰리면 느려지던 뉴스 요약을 미리 만들어 두는 구조로 설계하고, AI 에이전트와 함께 구현했습니다.</li>
+            </ul>
+          </dd>
+          <dt>결과</dt>
+          <dd class="result">일부러 넣은 잘못된 AI 문장 12건을 모두 걸러냈고, 동시 200명 부하 시험에서 응답 시간(p95)이 44% 줄었습니다. 이 팀 프로젝트는 최우수상을 받았습니다.</dd>
+        </dl>
+        <p class="links"><a href="https://drive.google.com/file/d/1PrJgtRkcnAkWnse0n9KKo0E7q5BLKMgd/view?usp=sharing" target="_blank" rel="noopener">시연 영상 보기</a><a href="https://github.com/finplay-team/finplay-backend" target="_blank" rel="noopener">GitHub</a></p>
+        <details>
+          <summary>자세히 보기 (개발자용)</summary>
           <ul>
-            <li>팀장으로 일정과 마감을 관리하고, 요구사항과 예외 상황을 먼저 문서로 정리해 4명이 같은 기준으로 개발하게 했습니다.</li>
-            <li>숫자 계산은 서버가 하고 AI는 문장만 쓰게 나눈 뒤, AI 문장 속 숫자를 서버 값과 대조하는 검사 장치를 만들었습니다.</li>
-            <li>AI가 멈추거나 늦어져도 거래는 계속되도록, 미리 준비한 안내 문장으로 자동 전환되게 했습니다.</li>
-            <li>사용자가 몰리면 느려지던 뉴스 요약을 미리 만들어 두는 방식으로 바꿨습니다.</li>
+            <li><strong>AI 출력 후검증:</strong> 기존 검사는 투자 조언 표현만 막고 숫자 변조는 0건 탐지. 숫자를 추출해 서버 입력값과 대조하도록 바꿔 12건 전부 탐지. 매수가·매도가 값이 서로 자리만 바뀌는 경우는 아직 못 잡는 한계로 기록했습니다.</li>
+            <li><strong>트랜잭션 경계 분리:</strong> LLM 응답(p95 약 3초)을 트랜잭션 안에서 기다리느라 커넥션 풀 20개가 곧 동시 조회 상한이었습니다. 읽기·LLM 호출·저장을 나눠 커넥션 점유를 수십 ms로 줄였습니다.</li>
+            <li><strong>뉴스 요약 배치 + Redis 캐시·분산 락:</strong> 동시 200명에서 요약 DB 조회 200건 → 1건, p95 896ms → 499ms, 6,668건 실패 0건. Redis를 61초 끊어도 DB 경로로 응답했습니다.</li>
+            <li><strong>미래 정보 노출 차단:</strong> 과거 거래일을 재생하는 구조에서 AI 요약이 그날 결말을 먼저 알려주던 문제를 요약 범위별 캐시 키로 분리, 부하 테스트 8,609요청 유출 0건.</li>
+            <li><strong>개발 방식:</strong> 개인 프로젝트 하네스에서 Context Router·실수 기록·영향도 기반 CI 등 5가지만 골라 팀에 이식하고, 유지 비용이 큰 것은 뺐습니다. 복잡한 구조는 설계 후 AI 에이전트와 함께 구현·검증했습니다.</li>
           </ul>
-        </dd>
-        <dt>결과</dt>
-        <dd class="result">일부러 넣은 잘못된 AI 문장 12건을 모두 걸러냈고, 동시 접속 200명에서 응답이 44% 빨라졌습니다. 최우수상을 받았습니다.</dd>
-      </dl>
-      <p class="links"><a href="https://drive.google.com/file/d/1PrJgtRkcnAkWnse0n9KKo0E7q5BLKMgd/view?usp=sharing" target="_blank" rel="noopener">시연 영상 보기</a><a href="https://github.com/finplay-team/finplay-backend" target="_blank" rel="noopener">GitHub</a></p>
-      <details>
-        <summary>자세히 보기 (개발자용)</summary>
-        <ul>
-          <li><strong>AI 출력 후검증:</strong> 기존 검사는 투자 조언 표현만 막고 숫자 변조는 0건 탐지. 숫자를 추출해 서버 입력값과 대조하도록 바꿔 12건 전부 탐지. 매수가·매도가 값이 서로 자리만 바뀌는 경우는 아직 못 잡는 한계로 기록했습니다.</li>
-          <li><strong>트랜잭션 경계 분리:</strong> LLM 응답(p95 약 3초)을 트랜잭션 안에서 기다리느라 커넥션 풀 20개가 곧 동시 조회 상한이었습니다. 읽기·LLM 호출·저장을 나눠 커넥션 점유를 수십 ms로 줄였습니다.</li>
-          <li><strong>뉴스 요약 배치 + Redis 캐시·분산 락:</strong> 동시 200명에서 요약 DB 조회 200건 → 1건, p95 896ms → 499ms, 6,668건 실패 0건. Redis를 61초 끊어도 DB 경로로 응답했습니다.</li>
-          <li><strong>미래 정보 노출 차단:</strong> 과거 거래일을 재생하는 구조에서 AI 요약이 그날 결말을 먼저 알려주던 문제를 요약 범위별 캐시 키로 분리, 부하 테스트 8,609요청 유출 0건.</li>
-          <li><strong>개발 방식:</strong> 개인 프로젝트 하네스에서 Context Router·실수 기록·영향도 기반 CI 등 5가지만 골라 팀에 이식하고, 유지 비용이 큰 것은 뺐습니다. 복잡한 구조는 설계 후 AI 에이전트와 함께 구현·검증했습니다.</li>
-        </ul>
-        <div class="tags" style="margin-top:14px"><span>Java</span><span>Spring Boot</span><span>Spring AI</span><span>MySQL</span><span>Redis</span><span>AWS</span><span>Docker</span><span>GitHub Actions</span><span>k6</span></div>
-      </details>
+          <div class="tags"><span>Java</span><span>Spring Boot</span><span>Spring AI</span><span>MySQL</span><span>Redis</span><span>AWS</span><span>Docker</span><span>GitHub Actions</span><span>k6</span></div>
+        </details>
+      </div>
     </article>
 
     <article class="case">
-      <div>
-        <h3>alf.io · 해외 오픈소스 서비스 위에 AI 기능과 개발 환경 얹기</h3>
-        <p class="meta">2026.10 · 2인(정욱재) · 기획 · AI 개발 환경 설계</p>
+      <div class="visual">
+        <div class="agents" aria-label="AI 개발 환경 구조">
+          <div class="agent"><span class="tag">PLAN</span><b>계획 에이전트</b><span>요구사항을 작업 단위로 나누고 필요한 문서만 고름</span></div>
+          <div class="agent"><span class="tag">BUILD</span><b>구현 에이전트</b><span>작업마다 한 명만 코드를 수정</span></div>
+          <div class="agent"><span class="tag">VERIFY</span><b>검증 에이전트</b><span>테스트와 독립 리뷰로 결과 확인</span></div>
+        </div>
+        <div class="loop"><span class="tag">LEARN ↺</span><span>AI가 실수한 기록을 남겨 다음 작업의 규칙으로 고침</span></div>
       </div>
-      <dl class="story">
-        <dt>문제</dt>
-        <dd>이미 크게 만들어진 남의 서비스에 기능을 더해야 했습니다. 문서와 코드가 많아 AI가 필요한 근거를 못 찾거나, 긴 작업이 중간에 끊기면 처음부터 다시 설명해야 했습니다.</dd>
-        <dt>한 일</dt>
-        <dd>
+      <div class="body">
+        <div class="kicker"><b>alf.io</b><span>해외 오픈소스 행사·티켓 서비스 확장</span><span>2026.10</span><span>2인(정욱재) · 기획 · AI 개발 환경 설계</span></div>
+        <h3>기존 오픈소스 서비스에 AI 기능과 개발 환경 확장</h3>
+        <p class="outcome">예약 12,000건 시험 · 정합성 위반 0건<small>동시 접속을 단계별로 늘린 정합성 시험</small></p>
+        <dl class="story">
+          <dt>문제</dt>
+          <dd>이미 크게 만들어진 남의 서비스에 기능을 더해야 했습니다. 문서와 코드가 많아 AI가 필요한 근거를 못 찾거나, 긴 작업이 중간에 끊기면 처음부터 다시 설명해야 했습니다.</dd>
+          <dt>한 일</dt>
+          <dd>
+            <ul>
+              <li>처음 개발 환경을 세팅할 때 계획하는 에이전트, 구현하는 에이전트, 검증하는 에이전트로 역할을 나누는 구조를 설계하고, AI가 실수한 기록을 남겨 규칙을 계속 고쳤습니다.</li>
+              <li>행사 담당자가 참석자 명단과 티켓을 손으로 맞춰 보던 일을 줄이는 AI 비서를 기획하고 프롬프트를 설계했습니다. 구현은 정욱재 님이 맡았습니다.</li>
+              <li>AI가 작업에 필요한 문서 부분만 골라 읽게 하는 도구와, 끊긴 작업을 그대로 이어가게 하는 인수인계 도구를 만들었습니다.</li>
+              <li>예약 기능에 동시 접속을 단계별로 늘려 가며 예약 요청 12,000건을 시험했습니다.</li>
+            </ul>
+          </dd>
+          <dt>결과</dt>
+          <dd class="result">문서 1,000개 환경에서 정답은 유지하면서 AI 사용량이 약 3분의 1로 줄어든 사례를 확인했고, 12,000건 시험에서 티켓이 중복되거나 꼬인 정합성 위반은 0건이었습니다.</dd>
+        </dl>
+        <p class="links"><a href="https://github.com/WookJaes/alf.io" target="_blank" rel="noopener">GitHub</a></p>
+        <details>
+          <summary>자세히 보기 (개발자용)</summary>
           <ul>
-            <li>처음 개발 환경을 세팅할 때 계획하는 에이전트, 구현하는 에이전트, 검증하는 에이전트로 역할을 나누는 구조를 설계하고, AI가 실수한 기록을 남겨 규칙을 계속 고쳤습니다.</li>
-            <li>행사 담당자가 참석자 명단과 티켓을 손으로 맞춰 보던 일을 줄이는 AI 비서를 기획하고 프롬프트를 설계했습니다. 구현은 정욱재 님이 맡았습니다.</li>
-            <li>AI가 작업에 필요한 문서 부분만 골라 읽게 하는 도구와, 끊긴 작업을 그대로 이어가게 하는 인수인계 도구를 만들었습니다.</li>
-            <li>예약 기능에 동시 접속을 단계별로 늘려 가며 예약 요청 12,000건을 시험했습니다.</li>
+            <li><strong>작업별 문서 선택기:</strong> 필수 지침은 항상 포함하고, 나머지는 작업에 맞는 구간만 경로·줄 범위·해시·선택 이유와 함께 반환합니다. 범위 밖 경로·링크 별칭 차단, 문서가 바뀌면 무효화, 근거 부족·상충 상태를 구분합니다.</li>
+            <li><strong>측정과 한계:</strong> 실제 Codex 작업 비교에서 토큰 약 150K → 55K(작업당 1회). 다문서 작업에서는 근거를 놓친 경우가 있어 일반화하지 않았습니다.</li>
+            <li><strong>세션 인수인계:</strong> 사용자 원문으로 요구·금지·완료 조건을 기록하는 기준표와 체크포인트를 두고, 경계마다 계속·원문 복구·새 세션·보류를 판정합니다.</li>
+            <li><strong>분업:</strong> Claude가 명세와 독립 리뷰를, Codex가 구현을 맡고, 리뷰 지적은 재현 명령으로 수정 전후를 확인했습니다.</li>
           </ul>
-        </dd>
-        <dt>결과</dt>
-        <dd class="result">문서 1,000개 환경에서 정답은 유지하면서 AI 사용량이 약 3분의 1로 줄어든 사례를 확인했고, 12,000건 시험에서 티켓이 꼬인 경우는 0건이었습니다.</dd>
-      </dl>
-      <p class="links"><a href="https://github.com/WookJaes/alf.io" target="_blank" rel="noopener">GitHub</a></p>
-      <details>
-        <summary>자세히 보기 (개발자용)</summary>
-        <ul>
-          <li><strong>작업별 문서 선택기:</strong> 필수 지침은 항상 포함하고, 나머지는 작업에 맞는 구간만 경로·줄 범위·해시·선택 이유와 함께 반환합니다. 범위 밖 경로·링크 별칭 차단, 문서가 바뀌면 무효화, 근거 부족·상충 상태를 구분합니다.</li>
-          <li><strong>측정과 한계:</strong> 실제 Codex 작업 비교에서 토큰 약 150K → 55K(작업당 1회). 다문서 작업에서는 근거를 놓친 경우가 있어 일반화하지 않았습니다.</li>
-          <li><strong>세션 인수인계:</strong> 사용자 원문으로 요구·금지·완료 조건을 기록하는 기준표와 체크포인트를 두고, 경계마다 계속·원문 복구·새 세션·보류를 판정합니다.</li>
-          <li><strong>분업:</strong> Claude가 명세와 독립 리뷰를, Codex가 구현을 맡고, 리뷰 지적은 재현 명령으로 수정 전후를 확인했습니다.</li>
-        </ul>
-        <div class="tags" style="margin-top:14px"><span>Python</span><span>Java</span><span>PostgreSQL</span><span>Claude Code</span><span>Codex</span></div>
-      </details>
+          <div class="tags"><span>Python</span><span>Java</span><span>PostgreSQL</span><span>Claude Code</span><span>Codex</span></div>
+        </details>
+      </div>
     </article>
   </section>
 
@@ -289,28 +379,28 @@ footer { border-top: 1px solid var(--line); padding-top: 20px; display: grid; ga
       </article>
       <article>
         <h3>Coffee Order System</h3>
-        <p>여러 서버에서도 주문과 포인트가 꼬이지 않는 구조를 설계하고, AI 에이전트와 12일간 66건의 작업 단위로 구현했습니다. 여기서 만든 AI 개발 규칙과 자동 검사를 FinPlay 팀으로 옮겼습니다.</p>
+        <p>여러 서버에서도 주문과 포인트가 꼬이지 않는 구조를 설계하고, AI 에이전트와 12일간 구현했습니다(PR 66건). 여기서 만든 AI 개발 규칙과 자동 검사를 FinPlay 팀으로 옮겼습니다.</p>
         <p class="note">2026.07 · 개인 · <a href="https://github.com/namdongyeob/coffee-order-system" target="_blank" rel="noopener">GitHub</a></p>
       </article>
     </div>
   </section>
 
-  <section aria-labelledby="how-title">
+  <section id="how" aria-labelledby="how-title">
     <header>
       <p class="label">일하는 방식</p>
       <h2 id="how-title">새로운 현장에 AI를 넣을 때의 순서</h2>
     </header>
-    <ol class="principles steps">
-      <li><strong>현장 업무를 먼저 이해합니다.</strong><span>어디서 시간이 새고 어디서 실수가 나는지 봅니다. 매장을 직접 운영하고 검수 업무를 하며 익힌 습관입니다.</span><span class="where">해 본 곳: 크라우드웍스 검수, alf.io 행사 담당자 업무</span></li>
+    <ol class="steps">
+      <li><strong>현장 업무를 먼저 이해합니다.</strong><span>어디서 시간이 새고 어디서 실수가 나는지 봅니다. 매장을 직접 운영하고 검수 업무를 하며 익힌 습관입니다.</span><span class="where">실무: 크라우드웍스 검수 · 프로젝트 기획: alf.io 행사 담당자 기능</span></li>
       <li><strong>판단 기준을 글로 정리합니다.</strong><span>사람 머릿속에만 있던 기준을 AI도 읽을 수 있게 문서로 만들고, 예외와 반례를 붙입니다.</span><span class="where">해 본 곳: 크라우드웍스 판정 기준, FinPlay 요구사항 문서</span></li>
       <li><strong>AI의 역할을 나눕니다.</strong><span>계획, 실행, 검증을 서로 다른 에이전트에게 맡기고, 필요한 문서만 읽게 합니다.</span><span class="where">해 본 곳: alf.io 개발 환경, 문서 선택기</span></li>
-      <li><strong>사람이 확인할 지점을 정합니다.</strong><span>모든 걸 AI에게 맡기지 않고, 판단이 엇갈리거나 결과가 사용자에게 바로 가는 곳에 확인 장치를 둡니다.</span><span class="where">해 본 곳: 크라우드웍스 교차 판정, FinPlay 숫자 검증</span></li>
+      <li><strong>사람이 확인할 지점을 정합니다.</strong><span>판단이 엇갈리거나 결과가 사용자에게 바로 가는 곳에 확인 장치를 둡니다.</span><span class="where">해 본 곳: 크라우드웍스 교차 판정, FinPlay 숫자 검증</span></li>
       <li><strong>틀린 것을 규칙으로 바꿉니다.</strong><span>실수는 적용 조건과 반례까지 기록하고, 사람이 확인한 것만 AI의 기억에 남깁니다.</span><span class="where">해 본 곳: 크라우드웍스 기억 관리, alf.io 실수 기록</span></li>
       <li><strong>숫자로 확인하고 한계도 적습니다.</strong><span>시간, 일치율, 오류 건수로 효과를 보고, 아직 못 잡는 경우도 함께 남깁니다.</span><span class="where">해 본 곳: 세 사례 모두</span></li>
     </ol>
   </section>
 
-  <section aria-labelledby="path-title">
+  <section id="path" aria-labelledby="path-title">
     <header>
       <p class="label">경력과 교육</p>
       <h2 id="path-title">걸어온 길</h2>
@@ -323,11 +413,15 @@ footer { border-top: 1px solid var(--line); padding-top: 20px; display: grid; ga
     </ul>
   </section>
 
-  <footer>
+</div>
+</main>
+
+<footer class="gutter">
+  <div class="inner">
     <span>남동엽 · ehdduq1324@gmail.com</span>
     <span><a href="https://github.com/namdongyeob" target="_blank" rel="noopener">github.com/namdongyeob</a> · <a href="https://www.linkedin.com/in/namdongyeob" target="_blank" rel="noopener">linkedin.com/in/namdongyeob</a></span>
-  </footer>
-</div>
+  </div>
+</footer>
 
 <script>
 document.getElementById('copy-email').addEventListener('click', function () {
@@ -337,9 +431,7 @@ document.getElementById('copy-email').addEventListener('click', function () {
     var r = document.createRange(); r.selectNodeContents(document.getElementById('email'));
     var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); done('선택됨');
   }
-  try {
-    navigator.clipboard.writeText(text).then(function () { done('복사됨'); }, fallback);
-  } catch (e) { fallback(); }
+  try { navigator.clipboard.writeText(text).then(function () { done('복사됨'); }, fallback); } catch (e) { fallback(); }
 });
 </script>
 </body>
