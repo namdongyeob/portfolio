@@ -144,8 +144,9 @@ dd.next { color: var(--muted); }
 .bar-group > span { font-size: var(--step--1); font-weight: 600; }
 .bar { display: grid; grid-template-columns: 3.2em minmax(0, 1fr) 4.6em; gap: 10px; align-items: center; font-size: var(--step--1); }
 .bar .k { color: var(--muted); }
-.bar .track { height: 10px; background: var(--line); border-radius: 999px; overflow: hidden; }
-.bar .fill { height: 100%; border-radius: 999px; background: var(--muted); min-width: 3px; }
+.bar .track { display: block; height: 12px; background: var(--line); border-radius: 999px; overflow: hidden; }
+.bar .fill { display: block; height: 100%; border-radius: 999px; background: var(--muted); min-width: 4px; }
+.bar-group .delta { margin-left: 8px; font-style: normal; font-weight: 700; color: var(--good); }
 .bar.after .fill { background: var(--good); }
 .bar .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
 
@@ -282,11 +283,11 @@ footer a { color: var(--band-fg); }
       <div class="visual">
         <figure><img src="finplay-cover.jpg" alt="FinPlay 서비스 표지: 주식·코인 교육형 모의투자 플랫폼" width="1200" height="675"></figure>
         <div class="bars" role="img" aria-label="개선 전후 비교: 뉴스 요약 응답 시간 896밀리초에서 499밀리초, 요약 데이터베이스 조회 200건에서 1건">
-          <div class="bar-group"><span>뉴스 요약 응답 시간 (동시 200명, p95)</span>
+          <div class="bar-group"><span>뉴스 요약 응답 시간 (동시 200명, p95)<em class="delta">44% 단축</em></span>
             <div class="bar"><span class="k">전</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="v">896ms</span></div>
             <div class="bar after"><span class="k">후</span><span class="track"><span class="fill" style="width:55.7%"></span></span><span class="v">499ms</span></div>
           </div>
-          <div class="bar-group"><span>요약 데이터 DB 조회 횟수</span>
+          <div class="bar-group"><span>요약 데이터 DB 조회 횟수<em class="delta">200건 → 1건</em></span>
             <div class="bar"><span class="k">전</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="v">200건</span></div>
             <div class="bar after"><span class="k">후</span><span class="track"><span class="fill" style="width:0.5%"></span></span><span class="v">1건</span></div>
           </div>
